@@ -4,6 +4,8 @@
 # Ignore node_modules
 node_modules/
 
+datas/
+
 # Ignore Python cache files
 *.pyc
 __pycache__/
