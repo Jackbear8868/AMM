@@ -5,7 +5,7 @@ const { parse } = require("json2csv");
 
 // Initialize Infura provider
 const provider = new providers.JsonRpcProvider(
-  `https://mainnet.infura.io/v3/Your Infura API Key`
+  `https://mainnet.infura.io/v3/10311d634e48456eb1a692b8952d47eb`
 );
 
 // Uniswap ETH/USDC Pair contract address
@@ -20,12 +20,12 @@ const pairAbi = [
 const pairContract = new Contract(pairAddress, pairAbi, provider);
 
 // Block range
-const startBlock = 18947061; // Start block
-const endBlock = 21525890; // End block (example range)
-const blockStep = 1; // Step size for iterating through blocks
+const startBlock = 18911837; // Start block
+const endBlock = 18911837; // End block (example range)
+const blockStep = 7100; // Step size for iterating through blocks
 
 // File to save CSV data
-const csvFilePath = path.join(__dirname, "reserves.csv");
+const csvFilePath = path.join(__dirname, "every_reserves.csv");
 
 // Append data to the CSV file
 const appendToCsvFile = (data) => {

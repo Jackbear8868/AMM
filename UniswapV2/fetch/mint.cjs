@@ -5,7 +5,7 @@ const { parse } = require("json2csv");
 
 // Initialize Infura provider
 const provider = new providers.JsonRpcProvider(
-  `https://mainnet.infura.io/v3/Your Infura API Key`
+  `https://mainnet.infura.io/v3/Your_Infura_API_Key`
 );
 
 // Uniswap ETH/USDC Pair contract address

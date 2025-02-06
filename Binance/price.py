@@ -4,29 +4,31 @@ import datetime
 import time
 
 # Define the base URL and endpoint for Binance API
-BASE_URL = "https://data-api.binance.vision/api/v3"
+BASE_URL = "https://api.binance.com/api/v3"
 ENDPOINT = "/klines"
 
-# Define the trading pair and other parameters
+# Define the trading pair and interval
 symbol = "ETHUSDC"
-interval = "1m"  # Minute interval
-start_date = "2023-12-30"
-end_date = "2025-01-02"
+interval = "1h"  # 1-hour candlesticks
 
-# Convert the start and end dates to milliseconds since Unix epoch
-start_time = int(datetime.datetime.strptime(start_date, "%Y-%m-%d").timestamp() * 1000)
-end_time = int(datetime.datetime.strptime(end_date, "%Y-%m-%d").timestamp() * 1000)
+# Convert start and end dates to UTC timestamps in milliseconds
+start_time = int(datetime.datetime(2023, 12, 30, 0, 0, 0, tzinfo=datetime.timezone.utc).timestamp() * 1000)
+end_time = int(datetime.datetime(2024, 1, 2, 0, 0, 0, tzinfo=datetime.timezone.utc).timestamp() * 1000)
 
-# Function to fetch data in chunks
+print(f"Fetching data from {datetime.datetime.fromtimestamp(start_time/1000, datetime.UTC)} UTC "
+      f"to {datetime.datetime.fromtimestamp(end_time/1000, datetime.UTC)} UTC")
+
+# Function to fetch data in batches
 def fetch_data(start_time, end_time, symbol, interval):
     all_data = []
+    
     while start_time < end_time:
         params = {
             "symbol": symbol,
             "interval": interval,
             "startTime": start_time,
             "endTime": end_time,
-            "limit": 1000  # Maximum number of data points per request
+            "limit": 1000  # Binance API allows max 1000 per request
         }
 
         response = requests.get(BASE_URL + ENDPOINT, params=params)
@@ -34,15 +36,18 @@ def fetch_data(start_time, end_time, symbol, interval):
         if response.status_code == 200:
             data = response.json()
             if not data:
-                break
+                break  # No more data available
 
-            # Add data to the list
+            # Append data to the list
             all_data.extend(data)
 
-            # Update start_time to fetch the next batch
-            start_time = data[-1][0] + 1  # Add 1 millisecond to avoid duplication
+            # Move to the next batch (next timestamp after the last one)
+            last_timestamp = data[-1][0]
+            if last_timestamp == start_time:  # Prevent infinite loops if no progress is made
+                break
+            start_time = last_timestamp + 1  # Avoid duplicate entries
 
-            # Pause to avoid hitting API limits
+            # Respect API rate limits
             time.sleep(0.1)
         else:
             print(f"Error: Unable to fetch data. Status code {response.status_code}")
@@ -50,22 +55,28 @@ def fetch_data(start_time, end_time, symbol, interval):
 
     return all_data
 
-# Fetch data
+# Fetch data from Binance API
 data = fetch_data(start_time, end_time, symbol, interval)
 
-# Extract relevant columns: Open Time and Close Price
-columns = ["Open Time", "Close"]
-extracted_data = [[item[0], item[4]] for item in data]
+if not data:
+    print("No data retrieved. Check your parameters or API limits.")
+    exit()
 
-# Create a DataFrame from the extracted data
+# Extract relevant columns: Open Time and Close Price
+columns = ["Open Time", "Close Price"]
+extracted_data = [[item[0], float(item[4])] for item in data]
+
+# Create DataFrame
 df = pd.DataFrame(extracted_data, columns=columns)
 
-# Convert timestamps to readable datetime format
-df["Open Time"] = pd.to_datetime(df["Open Time"], unit='ms')
-df["Close"] = df["Close"].astype(float)
+# Convert timestamps to readable UTC datetime format
+df["Open Time"] = pd.to_datetime(df["Open Time"], unit="ms", utc=True).dt.tz_localize(None)
 
-# Display the first few rows of the DataFrame
-print(df.head())
+# Ensure no boundary issues by checking the first and last rows
+print(f"First timestamp: {df.iloc[0]['Open Time']}")
+print(f"Last timestamp: {df.iloc[-1]['Open Time']}")
 
-# Save the data to a CSV file (optional)
-df.to_csv(f"ETHUSDC.csv", index=False)
+# Save to CSV
+df.to_csv("ETHUSDC_1h_corrected.csv", index=False)
+
+print("✅ Data successfully saved to 'ETHUSDC_1h_corrected.csv'")

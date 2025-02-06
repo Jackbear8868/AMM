@@ -4,13 +4,13 @@ import time
 
 # Step 1: Load the minute-level price data
 start_time = time.time()
-df = pd.read_csv("ETHUSDC_1s.csv")
+df = pd.read_csv("ETHUSDC.csv")
 
 # Step 2: Calculate log returns
-log_returns = np.log(df["Close"].values[1:] / df["Close"].values[:-1])
+log_returns = np.log(df["ETH_price"].values[1:] / df["ETH_price"].values[:-1])
 
 # Step 3: Define rolling window size (1440 minutes = 1 day)
-window_size = 1440 * 60
+window_size = 1440 * 5
 
 # Step 4: Calculate rolling realized volatility using NumPy
 realized_volatility = np.array([
@@ -23,7 +23,7 @@ result_df = df.iloc[window_size:].copy()
 result_df["Realized Volatility"] = realized_volatility
 
 # Step 6: Save the result to a new CSV
-result_df.to_csv("RV_1s.csv", index=False)
+result_df.to_csv("RV.csv", index=False)
 
 end_time = time.time()
 print(f"Rolling realized volatility has been saved to 'RV_1m_optimized.csv'.")

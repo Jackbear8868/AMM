@@ -1,30 +1,51 @@
-import csv
-from dune_client.client import DuneClient
-from datetime import datetime, timezone
+import pandas as pd
+from datetime import datetime, timedelta
 
-# Initialize Dune Client
-dune = DuneClient("Your Dune Api key", request_timeout=1000000)
+# File paths
+input_file = "timestamp.csv"
+output_file = "test.csv"
 
-# Fetch the latest query result
-query_result = dune.get_latest_result(4610627)
+dtypes = {
+    "burn_amount0": "string",
+    "burn_amount1": "string",
+    "mint_amount0": "string",
+    "mint_amount1": "string",
+    "reserve0": "string",
+    "reserve1": "string",
+    "amount0In": "string",
+    "amount1In": "string",
+    "amount0Out": "string",
+    "amount1Out": "string",
+}
 
-# Extract rows and column names from the result
-rows = query_result.result.rows  # List of dictionaries containing data
-column_names = query_result.result.metadata.column_names  # Column headers
+# Initial values
+start_block = 18908894
+start_timestamp = "2023-12-31 11:59:59"  # Starting timestamp
+average_block_time = 12.09992925000  # Average block generation period in seconds
 
-# Define output CSV file
-output_file = "timestamp.csv"
+# Read the CSV file
+df = pd.read_csv(input_file, low_memory=False, dtype=dtypes)
 
-# Write the data to a CSV file
-with open(output_file, mode="w", newline="") as file:
-    writer = csv.DictWriter(file, fieldnames=column_names)
-    writer.writeheader()  # Write column headers
-    
-    # Process rows to update the 'Timestamp' column
-    for row in rows:
-        if "Timestamp" in row:
-            # Convert the timestamp to a readable format
-            row["Timestamp"] = datetime.fromtimestamp(row["Timestamp"], timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
-        writer.writerow(row)  # Write the modified row
+# Ensure the CSV has a 'blockNumber' column
+if "blockNumber" not in df.columns:
+    raise ValueError("The CSV must contain a 'blockNumber' column.")
 
-print(f"CSV file has been created with updated 'Timestamp' column: {output_file}")
+# Sort by blockNumber to ensure proper calculation
+df = df.sort_values(by="blockNumber").reset_index(drop=True)
+
+# Calculate the timestamp for each block
+current_time = datetime.strptime(start_timestamp, "%Y-%m-%d %H:%M:%S")
+timestamps = []
+
+for block in df["blockNumber"]:
+    time_difference = (block - start_block) * average_block_time
+    adjusted_time = current_time + timedelta(seconds=time_difference)
+    timestamps.append(adjusted_time.strftime("%Y-%m-%d %H:%M:%S"))
+
+# Replace or add the timestamp column
+df["Timestamp"] = timestamps
+df.drop(columns=['timestamp'], inplace=True)
+# Save the updated DataFrame to a new CSV
+df.to_csv(output_file, index=False)
+
+print(f"CSV with updated timestamps saved as '{output_file}'.")

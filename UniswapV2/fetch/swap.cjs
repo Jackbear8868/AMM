@@ -5,7 +5,7 @@ const { parse } = require("json2csv");
 
 // Initialize Infura provider
 const provider = new providers.JsonRpcProvider(
-  `https://mainnet.infura.io/v3/Your Infura API Key`
+  `https://mainnet.infura.io/v3/10311d634e48456eb1a692b8952d47eb`
 );
 
 // Uniswap ETH/USDC Pair contract address
@@ -17,10 +17,10 @@ const ProjectAbi = [
     anonymous: false,
     inputs: [
       { indexed: true, name: "sender", type: "address" },
-      { indexed: false, name: "amount0In", type: "uint256" },
-      { indexed: false, name: "amount1In", type: "uint256" },
-      { indexed: false, name: "amount0Out", type: "uint256" },
-      { indexed: false, name: "amount1Out", type: "uint256" },
+      { indexed: false, name: "amount0In", type: "uint" },
+      { indexed: false, name: "amount1In", type: "uint" },
+      { indexed: false, name: "amount0Out", type: "uint" },
+      { indexed: false, name: "amount1Out", type: "uint" },
       { indexed: true, name: "to", type: "address" }
     ],
     name: "Swap",
@@ -32,7 +32,7 @@ const ProjectAbi = [
 const pair = new Contract(pairAddress, ProjectAbi, provider);
 
 // Block range
-const startBlock = 21525891; // Start block
+const startBlock = 18908894; // Start block
 const endBlock = 21528671; // End block
 const maxBlocks = 5000; // Limit block range to 1000 blocks
 // 21528671
