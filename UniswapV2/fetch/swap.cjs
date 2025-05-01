@@ -8,7 +8,7 @@ const provider = new providers.JsonRpcProvider(
   `https://mainnet.infura.io/v3/10311d634e48456eb1a692b8952d47eb`
 );
 
-// Uniswap ETH/USDC Pair contract address
+// Uniswap V2 ETH/USDC Pair contract address
 const pairAddress = "0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc";
 
 // ABI containing only the Swap event
@@ -32,12 +32,12 @@ const ProjectAbi = [
 const pair = new Contract(pairAddress, ProjectAbi, provider);
 
 // Block range
-const startBlock = 18908894; // Start block
+const startBlock = 21520000; // Start block 10728353 14945353
 const endBlock = 21528671; // End block
-const maxBlocks = 5000; // Limit block range to 1000 blocks
+const maxBlocks = 3500; // Limit block range to 5000 blocks
 // 21528671
 // File to save CSV data
-const csvFilePath = path.join(__dirname, "swap_events.csv");
+const csvFilePath = path.join(__dirname, "tmp_swap_events.csv");
 
 // Initialize CSV file with headers
 const initializeCsvFile = () => {
@@ -57,7 +57,12 @@ const appendToCsvFile = (data) => {
 (async () => {
   try {
     // Initialize CSV file
-    initializeCsvFile();
+    if (!fs.existsSync(csvFilePath)) {
+      initializeCsvFile();
+      console.log("CSV file initialized with headers.");
+    } else {
+      console.log("CSV file already exists. Appending to existing file.");
+    }
 
     console.log(`Fetching Swap events from blocks ${startBlock} to ${endBlock}...`);
 
@@ -83,7 +88,12 @@ const appendToCsvFile = (data) => {
         amount1Out: event.args.amount1Out.toString()
       }));
 
-      appendToCsvFile(processedData);
+      if (processedData.length > 0) {
+        appendToCsvFile(processedData);
+        console.log(`Appended ${processedData.length} records to CSV.`);
+      } else {
+        console.log("No swap events found in this block range. Skipping write.");
+      }
 
       // Move to the next block range
       currentBlock = toBlock + 1;
