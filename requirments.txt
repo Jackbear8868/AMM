@@ -1,0 +1,7 @@
+numpy
+scipy
+matplotlib
+pandas
+web3
+typing_extensions
+tqdm
