@@ -15,6 +15,8 @@ interval = "1s"  # 1-hour candlesticks
 start_time = int(datetime.datetime(2023, 12, 30, 0, 0, 0, tzinfo=datetime.timezone.utc).timestamp() * 1000)
 end_time = int(datetime.datetime(2024, 1, 2, 0, 0, 0, tzinfo=datetime.timezone.utc).timestamp() * 1000)
 
+start = time.time()
+
 print(f"Fetching data from {datetime.datetime.fromtimestamp(start_time/1000, datetime.timezone.utc)} UTC "
       f"to {datetime.datetime.fromtimestamp(end_time/1000, datetime.timezone.utc)} UTC")
 
@@ -58,6 +60,7 @@ def fetch_data(start_time, end_time, symbol, interval):
 # Fetch data from Binance API
 data = fetch_data(start_time, end_time, symbol, interval)
 
+
 if not data:
     print("No data retrieved. Check your parameters or API limits.")
     exit()
@@ -71,6 +74,9 @@ df = pd.DataFrame(extracted_data, columns=columns)
 
 # Convert timestamps to readable UTC datetime format
 df["Open Time"] = pd.to_datetime(df["Open Time"], unit="ms", utc=True).dt.tz_localize(None)
+
+end = time.time()
+print(f"cost time: {end - start}")
 
 # Ensure no boundary issues by checking the first and last rows
 print(f"First timestamp: {df.iloc[0]['Open Time']}")
