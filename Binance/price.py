@@ -12,8 +12,8 @@ symbol = "ETHUSDT"
 interval = "1s"  # 1-hour candlesticks
 
 # Convert start and end dates to UTC timestamps in milliseconds
-start_time = int(datetime.datetime(2023, 12, 30, 0, 0, 0, tzinfo=datetime.timezone.utc).timestamp() * 1000)
-end_time = int(datetime.datetime(2024, 1, 2, 0, 0, 0, tzinfo=datetime.timezone.utc).timestamp() * 1000)
+start_time = int(datetime.datetime(2020, 8, 25, 7, 57, 22, tzinfo=datetime.timezone.utc).timestamp() * 1000)
+end_time = int(datetime.datetime(2020, 8, 25, 8, 57, 22, tzinfo=datetime.timezone.utc).timestamp() * 1000)
 
 start = time.time()
 
