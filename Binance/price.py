@@ -8,15 +8,15 @@ BASE_URL = "https://api.binance.com/api/v3"
 ENDPOINT = "/klines"
 
 # Define the trading pair and interval
-symbol = "ETHUSDC"
-interval = "1h"  # 1-hour candlesticks
+symbol = "ETHUSDT"
+interval = "1s"  # 1-hour candlesticks
 
 # Convert start and end dates to UTC timestamps in milliseconds
 start_time = int(datetime.datetime(2023, 12, 30, 0, 0, 0, tzinfo=datetime.timezone.utc).timestamp() * 1000)
 end_time = int(datetime.datetime(2024, 1, 2, 0, 0, 0, tzinfo=datetime.timezone.utc).timestamp() * 1000)
 
-print(f"Fetching data from {datetime.datetime.fromtimestamp(start_time/1000, datetime.UTC)} UTC "
-      f"to {datetime.datetime.fromtimestamp(end_time/1000, datetime.UTC)} UTC")
+print(f"Fetching data from {datetime.datetime.fromtimestamp(start_time/1000, datetime.timezone.utc)} UTC "
+      f"to {datetime.datetime.fromtimestamp(end_time/1000, datetime.timezone.utc)} UTC")
 
 # Function to fetch data in batches
 def fetch_data(start_time, end_time, symbol, interval):
@@ -77,6 +77,6 @@ print(f"First timestamp: {df.iloc[0]['Open Time']}")
 print(f"Last timestamp: {df.iloc[-1]['Open Time']}")
 
 # Save to CSV
-df.to_csv("ETHUSDC_1h_corrected.csv", index=False)
+df.to_csv(f"{symbol}_{interval}.csv", index=False)
 
-print("✅ Data successfully saved to 'ETHUSDC_1h_corrected.csv'")
+print(f"✅ Data successfully saved to {symbol}_{interval}.csv")
